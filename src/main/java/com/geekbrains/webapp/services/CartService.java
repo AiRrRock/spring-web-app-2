@@ -1,5 +1,6 @@
 package com.geekbrains.webapp.services;
 
+import com.geekbrains.webapp.dtos.OrderItemDto;
 import com.geekbrains.webapp.exceptions.ResourceNotFoundException;
 import com.geekbrains.webapp.model.Product;
 import com.geekbrains.webapp.utils.Cart;
@@ -7,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -41,5 +43,9 @@ public class CartService {
 
     public void clearCart() {
         cart.clear();
+    }
+
+    public List<OrderItemDto> getItems(){
+        return cart.getItems();
     }
 }

@@ -72,3 +72,16 @@ values ('user', '$2a$04$Fx/SX9.BAvtPlMyIIqqFx.hLY2Xp8nnhpzvEEVINvVpwIPbA3v/.i', 
 insert into users_roles (user_id, role_id)
 values (1, 1),
        (2, 2);
+
+CREATE TABLE orders
+(
+    id bigserial primary key,
+    total_price bigint not null
+);
+
+CREATE TABLE order_products
+(
+    order_id bigint not null references orders (id),
+    product_id bigint not null references products (id),
+    primary key (order_id, product_id)
+);
