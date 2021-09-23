@@ -1,5 +1,6 @@
 package com.geekbrains.webapp.dtos;
 
+import com.geekbrains.webapp.model.OrderItem;
 import com.geekbrains.webapp.model.Product;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,6 +20,14 @@ public class OrderItemDto {
         this.quantity = 1;
         this.price = product.getPrice();
         this.pricePerProduct = product.getPrice();
+    }
+
+    public OrderItemDto(OrderItem orderItem) {
+        this.productId = orderItem.getProduct().getId();
+        this.productTitle = orderItem.getProduct().getTitle();
+        this.quantity = orderItem.getQuantity();
+        this.price = orderItem.getPrice();
+        this.pricePerProduct = orderItem.getPricePerProduct();
     }
 
     public void changeQuantity(int delta) {

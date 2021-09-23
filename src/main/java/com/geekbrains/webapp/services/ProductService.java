@@ -46,4 +46,8 @@ public class ProductService {
             product.setCategory(category);
         }
     }
+
+    public Optional<Product> findByTitle(String title) {
+        return productRepository.findByTitle(title);
+    }
 }

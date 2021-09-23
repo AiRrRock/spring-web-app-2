@@ -24,8 +24,8 @@ public class SpringWebAppApplication {
 	// *. Рассмотреть MapStruct
 
 	// Домашнее задание:
-	// 1. Сделать на backend'е оформление заказа с сохранением его в БД
-	// 2. * Привязывать заказ к текущему пользователю
+	// 1. * Попробовать реализовать корзины + редис (Задача довольно тяжелая)
+	// 2. Если с кодом тяжело, то хотя бы текстом опишите логику работы (общую идею)
 
 	public static void main(String[] args) {
 		SpringApplication.run(SpringWebAppApplication.class, args);
