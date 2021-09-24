@@ -29,6 +29,11 @@ public class Cart {
         return false;
     }
 
+    public void add(OrderItemDto itemDto){
+        items.add(itemDto);
+        recalculate();
+    }
+
     public void add(Product product) {
         items.add(new OrderItemDto(product));
         recalculate();

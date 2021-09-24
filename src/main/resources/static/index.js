@@ -49,7 +49,18 @@
 angular.module('market-front').controller('indexController', function ($rootScope, $scope, $http, $localStorage) {
     const contextPath = 'http://localhost:8189/market';
 
+    $scope.getCartId = function () {
+          $http({
+            url: contextPath + 'api/v1/cart',
+            method: 'GET'
+          }).then(function (response) {
+             console.log(response)
+             $localStorage.cartId = response.data;
+          });
+    };
+
     $scope.tryToAuth = function () {
+        $scope.user.cartId = $localStorage.cartId;
         $http.post(contextPath + '/auth', $scope.user)
             .then(function successCallback(response) {
                 if (response.data.token) {
@@ -58,6 +69,7 @@ angular.module('market-front').controller('indexController', function ($rootScop
 
                     $scope.user.username = null;
                     $scope.user.password = null;
+                    $scope.getCartId();
                 }
             }, function errorCallback(response) {
             });
