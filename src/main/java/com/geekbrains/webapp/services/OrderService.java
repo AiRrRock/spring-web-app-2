@@ -27,9 +27,9 @@ public class OrderService {
     private final ProductService productService;
 
     @Transactional
-    public void createOrder(String username, OrderDetailsDto orderDetailsDto) {
+    public void createOrder(String username, String cardId, OrderDetailsDto orderDetailsDto) {
         User user = userService.findByUsername(username).orElseThrow(() -> new ResourceNotFoundException("Не удалось найти пользователя при оформлении заказа. Имя пользователя: " + username));
-        Cart cart = cartService.getCartForCurrentUser();
+        Cart cart = cartService.getCartForCurrentUser(cardId);
         Order order = new Order();
         order.setUser(user);
         order.setPrice(cart.getTotalPrice());
@@ -47,7 +47,7 @@ public class OrderService {
         }
         order.setItems(items);
         orderRepository.save(order);
-        cartService.clearCart();
+        cartService.clearCart(cardId);
     }
 
     public List<Order> findAllByUsername(String username) {
