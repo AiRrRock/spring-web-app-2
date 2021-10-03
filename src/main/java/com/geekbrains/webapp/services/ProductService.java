@@ -5,6 +5,7 @@ import com.geekbrains.webapp.exceptions.ResourceNotFoundException;
 import com.geekbrains.webapp.model.Category;
 import com.geekbrains.webapp.model.Product;
 import com.geekbrains.webapp.repositories.ProductRepository;
+import com.geekbrains.webapp.soap.product.ProductWS;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -28,8 +30,17 @@ public class ProductService {
         return productRepository.findAll(PageRequest.of(pageIndex, pageSize));
     }
 
+    public List<ProductWS> findAll() {
+        return productRepository.findAll().stream().map(ProductWS::new).collect(Collectors.toList());
+    }
+
     public Optional<Product> findById(Long id) {
         return productRepository.findById(id);
+    }
+
+    public ProductWS findWSById(Long id) {
+        ProductWS productWS = new ProductWS(productRepository.findById(id).get());
+        return productWS;
     }
 
     public Product save(Product product) {
