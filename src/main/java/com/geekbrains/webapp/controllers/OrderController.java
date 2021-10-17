@@ -21,10 +21,10 @@ import java.util.stream.Collectors;
 public class OrderController {
     private final OrderService orderService;
 
-    @PostMapping("{id}")
+    @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public void createOrder(@RequestBody OrderDetailsDto orderDetailsDto,@PathVariable String cardId, Principal principal) {
-        orderService.createOrder(principal.getName(), cardId, orderDetailsDto);
+    public void createOrder(@RequestBody OrderDetailsDto orderDetailsDto, Principal principal) {
+        orderService.createOrder(principal, orderDetailsDto);
     }
 
     @GetMapping

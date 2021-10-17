@@ -5,19 +5,21 @@ import com.geekbrains.webapp.exceptions.ResourceNotFoundException;
 import com.geekbrains.webapp.model.Category;
 import com.geekbrains.webapp.model.Product;
 import com.geekbrains.webapp.repositories.ProductRepository;
-import com.geekbrains.webapp.soap.product.ProductWS;
+import com.geekbrains.webapp.repositories.specifications.ProductSpecifications;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -25,22 +27,16 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final CategoryService categoryService;
 
+    private static final String FILTER_MIN_PRICE = "min_price";
+    private static final String FILTER_MAX_PRICE = "max_price";
+    private static final String FILTER_TITLE = "title";
 
-    public Page<Product> findAll(int pageIndex, int pageSize) {
-        return productRepository.findAll(PageRequest.of(pageIndex, pageSize));
-    }
-
-    public List<ProductWS> findAll() {
-        return productRepository.findAll().stream().map(ProductWS::new).collect(Collectors.toList());
+    public Page<Product> findAll(int pageIndex, int pageSize, MultiValueMap<String, String> rqParams) {
+        return productRepository.findAll(constructSpecification(rqParams), PageRequest.of(pageIndex, pageSize));
     }
 
     public Optional<Product> findById(Long id) {
         return productRepository.findById(id);
-    }
-
-    public ProductWS findWSById(Long id) {
-        ProductWS productWS = new ProductWS(productRepository.findById(id).get());
-        return productWS;
     }
 
     public Product save(Product product) {
@@ -60,5 +56,22 @@ public class ProductService {
 
     public Optional<Product> findByTitle(String title) {
         return productRepository.findByTitle(title);
+    }
+
+    private Specification<Product> constructSpecification(MultiValueMap<String, String> params) {
+        Specification<Product> spec = Specification.where(null);
+        if (params.containsKey(FILTER_MIN_PRICE) && !params.getFirst(FILTER_MIN_PRICE).isBlank()) {
+            int minPrice = Integer.parseInt(params.getFirst(FILTER_MIN_PRICE));
+            spec = spec.and(ProductSpecifications.priceGreaterOrEqualsThan(minPrice));
+        }
+        if (params.containsKey(FILTER_MAX_PRICE) && !params.getFirst(FILTER_MAX_PRICE).isBlank()) {
+            int maxPrice = Integer.parseInt(params.getFirst(FILTER_MAX_PRICE));
+            spec = spec.and(ProductSpecifications.priceLesserOrEqualsThan(maxPrice));
+        }
+        if (params.containsKey(FILTER_TITLE) && !params.getFirst(FILTER_TITLE).isBlank()) {
+            String title = params.getFirst(FILTER_TITLE);
+            spec = spec.and(ProductSpecifications.titleLike(title));
+        }
+        return spec;
     }
 }

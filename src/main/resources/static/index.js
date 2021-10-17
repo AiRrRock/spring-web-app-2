@@ -14,13 +14,13 @@
                 templateUrl: 'store/store.html',
                 controller: 'storeController'
             })
-            .when('/edit_product/:productId', {
-                templateUrl: 'edit_product/edit_product.html',
-                controller: 'editProductController'
-            })
-            .when('/create_product', {
-                templateUrl: 'create_product/create_product.html',
-                controller: 'createProductController'
+            // .when('/edit_product/:productId', {
+            //     templateUrl: 'edit_product/edit_product.html',
+            //     controller: 'editProductController'
+            // })
+            .when('/admin', {
+                templateUrl: 'admin/admin.html',
+                controller: 'adminController'
             })
             .when('/cart', {
                 templateUrl: 'cart/cart.html',
@@ -30,9 +30,9 @@
                 templateUrl: 'order_confirmation/order_confirmation.html',
                 controller: 'orderConfirmationController'
             })
-            .when('/orders', {
-                templateUrl: 'orders/orders.html',
-                controller: 'ordersController'
+            .when('/profile', {
+                templateUrl: 'profile/profile.html',
+                controller: 'profileController'
             })
             .otherwise({
                 redirectTo: '/'
@@ -40,8 +40,15 @@
     }
 
     function run($rootScope, $http, $localStorage) {
+        const contextPath = 'http://localhost:8189/market';
         if ($localStorage.webMarketUser) {
             $http.defaults.headers.common.Authorization = 'Bearer ' + $localStorage.webMarketUser.token;
+        }
+        if (!$localStorage.webMarketGuestCartId) {
+            $http.get(contextPath + '/api/v1/cart/generate')
+                .then(function successCallback(response) {
+                    $localStorage.webMarketGuestCartId = response.data.value;
+                });
         }
     }
 })();
@@ -49,18 +56,7 @@
 angular.module('market-front').controller('indexController', function ($rootScope, $scope, $http, $localStorage) {
     const contextPath = 'http://localhost:8189/market';
 
-    $scope.getCartId = function () {
-          $http({
-            url: contextPath + 'api/v1/cart',
-            method: 'GET'
-          }).then(function (response) {
-             console.log(response)
-             $localStorage.cartId = response.data;
-          });
-    };
-
     $scope.tryToAuth = function () {
-        $scope.user.cartId = $localStorage.cartId;
         $http.post(contextPath + '/auth', $scope.user)
             .then(function successCallback(response) {
                 if (response.data.token) {
@@ -69,7 +65,10 @@ angular.module('market-front').controller('indexController', function ($rootScop
 
                     $scope.user.username = null;
                     $scope.user.password = null;
-                    $scope.getCartId();
+
+                    $http.get(contextPath + '/api/v1/cart/' + $localStorage.webMarketGuestCartId + '/merge')
+                        .then(function successCallback(response) {
+                        });
                 }
             }, function errorCallback(response) {
             });
@@ -83,6 +82,7 @@ angular.module('market-front').controller('indexController', function ($rootScop
         if ($scope.user.password) {
             $scope.user.password = null;
         }
+        $location.path('/');
     };
 
     $scope.clearUser = function () {

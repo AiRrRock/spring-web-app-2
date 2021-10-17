@@ -29,11 +29,6 @@ public class Cart {
         return false;
     }
 
-    public void add(OrderItemDto itemDto){
-        items.add(itemDto);
-        recalculate();
-    }
-
     public void add(Product product) {
         items.add(new OrderItemDto(product));
         recalculate();
@@ -69,5 +64,23 @@ public class Cart {
         for (OrderItemDto i : items) {
             totalPrice += i.getPrice();
         }
+    }
+
+    public void merge(Cart another) {
+        for (OrderItemDto anotherItem : another.items) {
+            boolean merged = false;
+            for (OrderItemDto myItem : items) {
+                if (myItem.getProductId().equals(anotherItem.getProductId())) {
+                    myItem.changeQuantity(anotherItem.getQuantity());
+                    merged = true;
+                    break;
+                }
+            }
+            if (!merged) {
+                items.add(anotherItem);
+            }
+        }
+        recalculate();
+        another.clear();
     }
 }
