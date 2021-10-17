@@ -21,7 +21,7 @@ public class ProductsEndpoint {
     @ResponsePayload
     public GetProductByIdResponse getProductById(@RequestPayload GetProductByIdRequest request) {
         GetProductByIdResponse response = new GetProductByIdResponse();
-        response.setProduct(productService.findWSById(request.getId()));
+     //   response.setProduct(productService.findWSById(request.getId()));
         return response;
     }
 
@@ -30,7 +30,7 @@ public class ProductsEndpoint {
     @ResponsePayload
     public GetAllProductsResponse getProducts(@RequestPayload GetAllProductsRequest request) {
         GetAllProductsResponse response = new GetAllProductsResponse();
-        response.setProducts(productService.findAll());
+       // response.setProducts(productService.findAll());
         return response;
     }
 

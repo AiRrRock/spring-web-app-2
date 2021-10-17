@@ -3,7 +3,6 @@ package com.geekbrains.webapp.controllers;
 import com.geekbrains.webapp.dtos.AuthRequest;
 import com.geekbrains.webapp.dtos.AuthResponse;
 import com.geekbrains.webapp.exceptions.MarketError;
-import com.geekbrains.webapp.services.CartService;
 import com.geekbrains.webapp.services.UserService;
 import com.geekbrains.webapp.utils.JwtTokenUtil;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +22,6 @@ public class AuthController {
     private final UserService userService;
     private final JwtTokenUtil jwtTokenUtil;
     private final AuthenticationManager authenticationManager;
-    private final CartService cartService;
 
     @PostMapping("/auth")
     public ResponseEntity<?> createAuthToken(@RequestBody AuthRequest authRequest) {
@@ -34,9 +32,6 @@ public class AuthController {
         }
         UserDetails userDetails = userService.loadUserByUsername(authRequest.getUsername());
         String token = jwtTokenUtil.generateToken(userDetails);
-        if(authRequest.getCartId()!=null){
-            cartService.merge(cartService.getCartName(authRequest.getUsername()),authRequest.getCartId());
-        }
         return ResponseEntity.ok(new AuthResponse(token));
     }
 }

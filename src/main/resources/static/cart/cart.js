@@ -1,34 +1,18 @@
 angular.module('market-front').controller('cartController', function ($scope, $http, $location, $localStorage) {
     const contextPath = 'http://localhost:8189/market/';
 
-    $scope.getCartId = function () {
-          $http({
-            url: contextPath + 'api/v1/cart',
-              method: 'GET'
-             }).then(function (response) {
-               $localStorage.cartId = response.data;
-          });
-    };
-
     $scope.loadCart = function () {
-        if(!$localStorage.cartId){
-            $scope.getCartId();
-        }
         $http({
-            url: contextPath + 'api/v1/cart/' + $localStorage.cartId ,
+            url: contextPath + 'api/v1/cart/' + $localStorage.webMarketGuestCartId,
             method: 'GET'
         }).then(function (response) {
-        window.locals
             $scope.cart = response.data;
         });
     };
 
     $scope.incrementItem = function (productId) {
-        if(!$localStorage.cartId){
-                    $scope.getCartId();
-        }
         $http({
-            url: contextPath +'api/v1/cart/'+ $localStorage.cartId +'/add/' + productId,
+            url: contextPath + 'api/v1/cart/' + $localStorage.webMarketGuestCartId + '/add/' + productId,
             method: 'GET'
         }).then(function (response) {
             $scope.loadCart();
@@ -36,11 +20,8 @@ angular.module('market-front').controller('cartController', function ($scope, $h
     };
 
     $scope.decrementItem = function (productId) {
-        if(!$localStorage.cartId){
-            $scope.getCartId();
-        }
         $http({
-            url: contextPath + 'api/v1/cart/'+ $localStorage.cartId +'/decrement/' + productId,
+            url: contextPath + 'api/v1/cart/' + $localStorage.webMarketGuestCartId + '/decrement/' + productId,
             method: 'GET'
         }).then(function (response) {
             $scope.loadCart();
@@ -48,11 +29,8 @@ angular.module('market-front').controller('cartController', function ($scope, $h
     };
 
     $scope.removeItem = function (productId) {
-        if(!$localStorage.cartId){
-            $scope.getCartId();
-        }
         $http({
-            url: contextPath + 'api/v1/cart/'+ $localStorage.cartId +'/remove/' + productId,
+            url: contextPath + 'api/v1/cart/' + $localStorage.webMarketGuestCartId + '/remove/' + productId,
             method: 'GET'
         }).then(function (response) {
             $scope.loadCart();

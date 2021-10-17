@@ -1,81 +1,77 @@
 package com.geekbrains.webapp.services;
 
-import com.geekbrains.webapp.dtos.OrderItemDto;
 import com.geekbrains.webapp.exceptions.ResourceNotFoundException;
-import com.geekbrains.webapp.model.Order;
 import com.geekbrains.webapp.model.Product;
 import com.geekbrains.webapp.utils.Cart;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.security.Principal;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 @Service
 @RequiredArgsConstructor
 public class CartService {
-    private final ProductService productService;
     private final RedisTemplate<String, Object> redisTemplate;
-    public static final String CARD_PREFIX = "just_a_cart_";
+    private final ProductService productService;
 
-    public Cart getCartForCurrentUser(String cardId) {
-        if (!redisTemplate.hasKey(cardId)) {
-            redisTemplate.opsForValue().set(cardId, new Cart());
+    @Value("${utils.cart.prefix}")
+    private String cartPrefix;
+
+    public String getCartUuidFromSuffix(String suffix) {
+        return cartPrefix + suffix;
+    }
+
+    public String generateCartUuid() {
+        return UUID.randomUUID().toString();
+    }
+
+    public Cart getCurrentCart(String cartKey) {
+        if (!redisTemplate.hasKey(cartKey)) {
+            redisTemplate.opsForValue().set(cartKey, new Cart());
         }
-        Cart cart = (Cart) redisTemplate.opsForValue().get(cardId);
-        return cart;
+        return (Cart) redisTemplate.opsForValue().get(cartKey);
     }
 
-    public String getCartName(String userName){
-        return CARD_PREFIX+userName;
+    public void addToCart(String cartKey, Long productId) {
+        execute(cartKey, c -> {
+            if (!c.add(productId)) {
+                c.add(productService.findById(productId).orElseThrow(() -> new ResourceNotFoundException("Unable add product to cart. Product not found id: " + productId)));
+            }
+        });
     }
 
-    public void updateCart(String cardId, Cart cart) {
-        redisTemplate.opsForValue().set(cardId, cart);
+    public void clearCart(String cartKey) {
+        execute(cartKey, Cart::clear);
     }
 
-    public void addItem(String cardId, Long productId) {
-        Cart cart = getCartForCurrentUser(cardId);
-        if (cart.add(productId)) {
-            updateCart(cardId, cart);
-            return;
-        }
-        Product product = productService.findById(productId).orElseThrow(() -> new ResourceNotFoundException("Невозможно добавить продукт в корзину, так как продукт с id: " + productId + " не существует"));
-        cart.add(product);
-        updateCart(cardId, cart);
+    public void removeItemFromCart(String cartKey, Long productId) {
+        execute(cartKey, c -> c.remove(productId));
     }
 
-    public void removeItem(String cardId, Long productId) {
-        Cart cart = getCartForCurrentUser(cardId);
-        cart.remove(productId);
-        updateCart(cardId, cart);
+    public void decrementItem(String cartKey, Long productId) {
+        execute(cartKey, c -> c.decrement(productId));
     }
 
-    public void decrementItem(String cardId, Long productId) {
-        Cart cart = getCartForCurrentUser(cardId);
-        cart.decrement(productId);
-        updateCart(cardId, cart);
+    public void merge(String userCartKey, String guestCartKey) {
+        Cart guestCart = getCurrentCart(guestCartKey);
+        Cart userCart = getCurrentCart(userCartKey);
+        userCart.merge(guestCart);
+        updateCart(guestCartKey, guestCart);
+        updateCart(userCartKey, userCart);
     }
 
-    public void clearCart(String cardId) {
-        Cart cart = getCartForCurrentUser(cardId);
-        cart.clear();
-        updateCart(cardId, cart);
+    private void execute(String cartKey, Consumer<Cart> action) {
+        Cart cart = getCurrentCart(cartKey);
+        action.accept(cart);
+        redisTemplate.opsForValue().set(cartKey, cart);
     }
 
-    public void merge(String cardId, String tempCardId){
-        Cart userCart = getCartForCurrentUser(cardId);
-        Cart tempCard = getCartForCurrentUser(tempCardId);
-        for (OrderItemDto item: tempCard.getItems()){
-            userCart.add(item);
-        }
-        updateCart(cardId, userCart);
-
-    }
-
-    public boolean isCartExists(String cardId) {
-        return redisTemplate.hasKey(cardId);
+    public void updateCart(String cartKey, Cart cart) {
+        redisTemplate.opsForValue().set(cartKey, cart);
     }
 }

@@ -14,6 +14,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -27,9 +28,9 @@ public class OrderService {
     private final ProductService productService;
 
     @Transactional
-    public void createOrder(String username, String cardId, OrderDetailsDto orderDetailsDto) {
-        User user = userService.findByUsername(username).orElseThrow(() -> new ResourceNotFoundException("Не удалось найти пользователя при оформлении заказа. Имя пользователя: " + username));
-        Cart cart = cartService.getCartForCurrentUser(cardId);
+    public void createOrder(Principal principal, OrderDetailsDto orderDetailsDto) {
+        User user = userService.findByUsername(principal.getName()).orElseThrow(() -> new ResourceNotFoundException("Не удалось найти пользователя при оформлении заказа. Имя пользователя: " + principal.getName()));
+        Cart cart = cartService.getCurrentCart(cartService.getCartUuidFromSuffix(user.getUsername()));
         Order order = new Order();
         order.setUser(user);
         order.setPrice(cart.getTotalPrice());
@@ -47,7 +48,8 @@ public class OrderService {
         }
         order.setItems(items);
         orderRepository.save(order);
-        cartService.clearCart(cardId);
+        cart.clear();
+        cartService.updateCart(cartService.getCartUuidFromSuffix(user.getUsername()), cart);
     }
 
     public List<Order> findAllByUsername(String username) {
