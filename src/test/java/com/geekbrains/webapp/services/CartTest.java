@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
 
 @SpringBootTest(classes = {CartService.class, RedisConfig.class, ProductService.class})
 public class CartTest {
-    public static final String CARD_ID = "id1";
+  /*  public static final String CARD_ID = "id1";
     public static final long PRODUCT_ID = 1L;
     @Autowired
     private CartService cartService;
@@ -220,5 +220,5 @@ public class CartTest {
         Assertions.assertEquals(0, cartService.getCartForCurrentUser(CARD_ID).getItems().size());
 
     }
-
+*/
 }
