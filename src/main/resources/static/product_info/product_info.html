@@ -1,0 +1,53 @@
+<div>
+    <p></p>
+    <h3>{{product.title}}</h3>
+    <p> {{ product.id }} </p>
+    {{product.title}}
+    {{product.price}}
+
+    <table class="table">
+        <thead>
+        <tr>
+            <td>user</td>
+            <td>comment</td>
+            <td></td>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="c in comments">
+            <td>
+                {{c.userName}}
+            </td>
+            <td>
+                {{c.comment}}
+            </td>
+
+        </tr>
+        </tbody>
+    </table>
+
+    <div>
+        <p></p>
+        <h3>Добавить коментарий продукт</h3>
+        <form novalidate ng-submit="addComment()">
+            <input class="form-control" type="number" hidden placeholder="ID" ng-model="comment.product_id">
+
+            <p></p>
+            <input class="form-control" type="text" placeholder="Название категории" ng-model="comment.comment">
+            <p></p>
+            <button type="submit" class="btn btn-primary">Отправить</button>
+        </form>
+    </div>
+
+    <p></p>
+
+    <nav aria-label="Page navigation">
+        <ul class="pagination">
+            <li class="page-item" ng-repeat="pageIndex in paginationArray">
+                <button class="page-link" ng-click="loadProducts(pageIndex)">{{pageIndex}}</button>
+            </li>
+        </ul>
+    </nav>
+</div>
+</div>
+</div>
