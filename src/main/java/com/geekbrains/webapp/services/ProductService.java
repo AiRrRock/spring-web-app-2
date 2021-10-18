@@ -58,6 +58,14 @@ public class ProductService {
         return productRepository.findByTitle(title);
     }
 
+    public List<Long> findAllProductsByUserId(String username){
+        return productRepository.findAllProductIdsForUser(username);
+    }
+
+    public boolean hasBoughtProduct(String username, Long productId){
+        return findAllProductsByUserId(username).contains(productId);
+    }
+
     private Specification<Product> constructSpecification(MultiValueMap<String, String> params) {
         Specification<Product> spec = Specification.where(null);
         if (params.containsKey(FILTER_MIN_PRICE) && !params.getFirst(FILTER_MIN_PRICE).isBlank()) {
